@@ -31,6 +31,10 @@
             }
             return this.overlap(hitbox, defender.getHurtBox());
         }
+
+        projectileHits(projectile, fighter) {
+            return this.overlap(projectile.getHitBox(), fighter.getHurtBox());
+        }
     }
 
     SF.engine.CollisionSystem = CollisionSystem;

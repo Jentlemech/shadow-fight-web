@@ -13,7 +13,12 @@
                 punch: false,
                 kick: false,
                 weapon: false,
+                ranged: false,
+                magic: false,
                 switch: false,
+                switchRanged: false,
+                switchMagic: false,
+                inventory: false,
                 pause: false
             };
             this.joystick = {
@@ -25,19 +30,26 @@
 
             this.joystickBase = documentRef.getElementById("joystickBase");
             this.joystickThumb = documentRef.getElementById("joystickThumb");
-            this.switchWeaponButton = documentRef.getElementById("switchWeaponButton");
             this.touchButtons = Array.from(documentRef.querySelectorAll("[data-touch-action]"));
+            this.switchButtons = {
+                weapon: documentRef.getElementById("switchWeaponButton"),
+                ranged: documentRef.getElementById("switchRangedButton"),
+                magic: documentRef.getElementById("switchMagicButton"),
+                inventory: documentRef.getElementById("inventoryToggleButton")
+            };
 
             this.bindKeyboard();
             this.bindJoystick();
             this.bindTouchButtons();
-            this.bindSwitchButton();
+            this.bindSideButtons();
         }
 
         bindKeyboard() {
+            const prevented = ["a", "d", "w", "s", "j", "k", "l", "u", "i", "q", "e", "r", "p", "escape", "tab"];
+
             window.addEventListener("keydown", (event) => {
                 const key = event.key.toLowerCase();
-                if (["a", "d", "w", "s", "j", "k", "l", "q", "p", "escape"].includes(key)) {
+                if (prevented.includes(key)) {
                     event.preventDefault();
                 }
 
@@ -62,8 +74,23 @@
                 if (key === "l") {
                     this.queued.weapon = true;
                 }
+                if (key === "u") {
+                    this.queued.ranged = true;
+                }
+                if (key === "i") {
+                    this.queued.magic = true;
+                }
                 if (key === "q") {
                     this.queued.switch = true;
+                }
+                if (key === "e") {
+                    this.queued.switchRanged = true;
+                }
+                if (key === "r") {
+                    this.queued.switchMagic = true;
+                }
+                if (key === "tab") {
+                    this.queued.inventory = true;
                 }
                 if (key === "p" || key === "escape") {
                     this.queued.pause = true;
@@ -118,7 +145,7 @@
                 try {
                     this.joystickBase.setPointerCapture(event.pointerId);
                 } catch (error) {
-                    // Capture is optional for direct file-open play.
+                    // Pointer capture is optional.
                 }
                 updateFromEvent(event);
             });
@@ -156,26 +183,47 @@
             }
         }
 
-        bindSwitchButton() {
-            if (!this.switchWeaponButton) {
-                return;
-            }
+        bindSideButtons() {
+            const bindings = [
+                ["weapon", "switch"],
+                ["ranged", "switchRanged"],
+                ["magic", "switchMagic"],
+                ["inventory", "inventory"]
+            ];
 
-            const queueSwitch = (event) => {
-                event.preventDefault();
-                if (!this.enabled) {
-                    return;
+            for (const [buttonName, action] of bindings) {
+                const button = this.switchButtons[buttonName];
+                if (!button) {
+                    continue;
                 }
-                this.queued.switch = true;
-            };
 
-            this.switchWeaponButton.addEventListener("click", queueSwitch);
-            this.switchWeaponButton.addEventListener("pointerdown", queueSwitch);
+                const handler = (event) => {
+                    event.preventDefault();
+                    if (!this.enabled) {
+                        return;
+                    }
+                    this.queued[action] = true;
+                };
+
+                button.addEventListener("click", handler);
+                button.addEventListener("pointerdown", handler);
+            }
         }
 
         queueAction(action) {
-            if (action in this.queued) {
-                this.queued[action] = true;
+            const map = {
+                jump: "jump",
+                punch: "punch",
+                kick: "kick",
+                weapon: "weapon",
+                ranged: "ranged",
+                magic: "magic",
+                inventory: "inventory",
+                pause: "pause"
+            };
+            const queuedAction = map[action];
+            if (queuedAction) {
+                this.queued[queuedAction] = true;
             }
         }
 
@@ -229,7 +277,12 @@
                 punchPressed: this.consumeFlag("punch"),
                 kickPressed: this.consumeFlag("kick"),
                 weaponPressed: this.consumeFlag("weapon"),
+                rangedPressed: this.consumeFlag("ranged"),
+                magicPressed: this.consumeFlag("magic"),
                 switchPressed: this.consumeFlag("switch"),
+                switchRangedPressed: this.consumeFlag("switchRanged"),
+                switchMagicPressed: this.consumeFlag("switchMagic"),
+                inventoryPressed: this.consumeFlag("inventory"),
                 pausePressed: this.consumeFlag("pause")
             };
         }

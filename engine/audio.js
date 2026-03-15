@@ -25,9 +25,9 @@
             this.master = this.context.createGain();
             this.musicGain = this.context.createGain();
             this.fxGain = this.context.createGain();
-            this.master.gain.value = 0.45;
+            this.master.gain.value = 0.44;
             this.musicGain.gain.value = 0.22;
-            this.fxGain.gain.value = 0.6;
+            this.fxGain.gain.value = 0.58;
             this.musicGain.connect(this.master);
             this.fxGain.connect(this.master);
             this.master.connect(this.context.destination);
@@ -77,6 +77,21 @@
             this.playTone(360, 0.14, { volume: 0.16, wave: "sawtooth", frequencyEnd: 220 });
         }
 
+        playRanged() {
+            this.playTone(310, 0.12, { volume: 0.15, wave: "triangle", frequencyEnd: 180 });
+        }
+
+        playMagic(type) {
+            const map = {
+                fireball: [260, 420, "sawtooth"],
+                lightning_strike: [640, 880, "square"],
+                energy_shield: [420, 300, "triangle"],
+                dash_teleport: [520, 250, "triangle"]
+            };
+            const config = map[type] || [420, 300, "triangle"];
+            this.playTone(config[0], 0.22, { volume: 0.17, wave: config[2], frequencyEnd: config[1] });
+        }
+
         playBlock() {
             this.playTone(250, 0.09, { volume: 0.12, wave: "square", frequencyEnd: 180 });
         }
@@ -103,35 +118,47 @@
         }
 
         startMusic(mode) {
-            if (!this.context || this.musicTimer) {
+            if (!this.context) {
+                return;
+            }
+
+            if (this.musicTimer) {
                 clearInterval(this.musicTimer);
                 this.musicTimer = null;
             }
 
-            const dojoPattern = [220, 330, 294, 392, 330, 262];
-            const bossPattern = [110, 165, 110, 196, 147, 220];
-            const pattern = mode === "boss" ? bossPattern : dojoPattern;
-            const beat = mode === "boss" ? 280 : 360;
+            const patterns = {
+                dojo: { notes: [220, 330, 294, 392, 330, 262], beat: 360, wave: "triangle" },
+                forest_temple: { notes: [174, 220, 261, 220, 196, 294], beat: 340, wave: "triangle" },
+                mountain_fortress: { notes: [196, 247, 294, 247, 220, 330], beat: 320, wave: "square" },
+                dark_castle: { notes: [165, 220, 247, 220, 185, 277], beat: 300, wave: "sawtooth" },
+                shadow_realm: { notes: [147, 220, 294, 247, 196, 330], beat: 280, wave: "sawtooth" },
+                boss: { notes: [110, 165, 110, 196, 147, 220], beat: 260, wave: "sawtooth" }
+            };
+
+            const pattern = patterns[mode] || patterns.dojo;
             let step = 0;
 
             this.musicTimer = setInterval(() => {
-                const note = pattern[step % pattern.length];
-                this.playTone(note, 0.22, {
+                const note = pattern.notes[step % pattern.notes.length];
+                this.playTone(note, 0.24, {
                     volume: mode === "boss" ? 0.11 : 0.08,
-                    wave: mode === "boss" ? "sawtooth" : "triangle",
+                    wave: pattern.wave,
                     music: true,
-                    frequencyEnd: note * (mode === "boss" ? 1.1 : 0.92)
+                    frequencyEnd: note * (mode === "boss" ? 1.08 : 0.92)
                 });
-                if (mode === "boss" && step % 2 === 0) {
+
+                if (mode === "boss" || mode === "shadow_realm") {
                     this.playTone(note / 2, 0.28, {
-                        volume: 0.08,
+                        volume: 0.06,
                         wave: "square",
                         music: true,
-                        frequencyEnd: note / 2.2
+                        frequencyEnd: note / 2.1
                     });
                 }
+
                 step += 1;
-            }, beat);
+            }, pattern.beat);
         }
     }
 

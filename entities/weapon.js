@@ -1,35 +1,6 @@
 (function () {
     const SF = window.ShadowFight;
-
-    const LIBRARY = {
-        sword: {
-            id: "sword",
-            name: "Sword",
-            damage: 18,
-            speed: 0.46,
-            range: 118,
-            staminaCost: 18,
-            color: "#d8e1e8"
-        },
-        staff: {
-            id: "staff",
-            name: "Staff",
-            damage: 15,
-            speed: 0.38,
-            range: 150,
-            staminaCost: 16,
-            color: "#d5b181"
-        },
-        nunchaku: {
-            id: "nunchaku",
-            name: "Nunchaku",
-            damage: 13,
-            speed: 0.3,
-            range: 94,
-            staminaCost: 14,
-            color: "#b8cad8"
-        }
-    };
+    const RPGData = SF.entities.RPGData;
 
     class Weapon {
         constructor(config) {
@@ -37,11 +8,29 @@
         }
 
         static create(id) {
-            return new Weapon(LIBRARY[id]);
+            const item = RPGData.getItem(id);
+            if (!item) {
+                return null;
+            }
+
+            return new Weapon({
+                id: item.id,
+                name: item.name,
+                slot: item.slot,
+                category: item.category || "melee",
+                damage: item.damage || 0,
+                speed: item.speed || 0.4,
+                range: item.range || 0,
+                cooldown: item.cooldown || item.speed || 0.4,
+                manaCost: item.manaCost || 0,
+                power: item.power || item.damage || 0,
+                color: item.color || "#d8e1e8",
+                bonuses: Object.assign({}, item.bonuses)
+            });
         }
 
-        static all() {
-            return Object.keys(LIBRARY);
+        static all(slot) {
+            return RPGData.getItemsForSlot(slot || "weapon").map((item) => item.id);
         }
     }
 

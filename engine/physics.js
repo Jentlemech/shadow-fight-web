@@ -23,7 +23,7 @@
             }
 
             if (fighter.dodgeTimer > 0) {
-                fighter.vx = fighter.dodgeDirection * fighter.stats.moveSpeed * 1.8;
+                fighter.vx = fighter.dodgeDirection * fighter.stats.moveSpeed * 1.9;
             }
 
             fighter.x += fighter.vx * dt;
@@ -39,19 +39,14 @@
             }
 
             fighter.x = clamp(fighter.x, world.leftBound, world.rightBound);
-
-            if (fighter.stamina < fighter.stats.maxStamina && fighter.canRecoverStamina()) {
-                fighter.stamina = clamp(
-                    fighter.stamina + fighter.stats.staminaRecovery * dt,
-                    0,
-                    fighter.stats.maxStamina
-                );
-            }
+            fighter.recoverResources(dt);
 
             if (!canMove && fighter.grounded && fighter.state === "knockdown" && fighter.recoveryTimer <= 0) {
                 fighter.setState("idle");
             } else if (fighter.guardActive && fighter.grounded && fighter.canBlock()) {
                 fighter.setState("block");
+            } else if (fighter.currentAttack && (fighter.state === "weapon" || fighter.state === "punch" || fighter.state === "kick" || fighter.state === "ranged" || fighter.state === "magic")) {
+                fighter.setState(fighter.currentAttack.state);
             } else if (fighter.canControlState()) {
                 if (!fighter.grounded) {
                     fighter.setState("jump");

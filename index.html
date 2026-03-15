@@ -10,33 +10,89 @@
     <main class="app-shell">
         <section id="menuOverlay" class="overlay overlay-active">
             <div class="menu-panel start-panel">
-                <p class="eyebrow">Silhouette Arena</p>
+                <p class="eyebrow">Silhouette RPG Arena</p>
                 <h1>Shadow Fight Web</h1>
                 <p class="menu-copy">
-                    Choose your device, pick a mode, and enter a compact fighting game engine built entirely with HTML5 Canvas and vanilla JavaScript.
+                    Choose a device, fighter, and mode, then push through a progression-based shadow campaign with gear, mana, bosses, and multiple stages.
                 </p>
 
-                <div class="device-grid">
-                    <button class="device-card is-selected" data-device="desktop" type="button">
-                        <span class="device-icon" aria-hidden="true">💻</span>
-                        <span class="device-title">Play on Laptop/Desktop</span>
-                        <span class="device-copy">Keyboard combat with pause and weapon hotkeys.</span>
-                    </button>
+                <section class="menu-section">
+                    <div class="section-heading">
+                        <p class="eyebrow eyebrow-small">Step 1</p>
+                        <h2>Choose Your Device</h2>
+                    </div>
+                    <div class="device-grid">
+                        <button class="device-card is-selected" data-device="desktop" type="button">
+                            <span class="device-icon" aria-hidden="true">💻</span>
+                            <span class="device-title">Laptop/Desktop</span>
+                            <span class="device-copy">Keyboard controls, pause shortcuts, and inventory hotkeys.</span>
+                        </button>
 
-                    <button class="device-card" data-device="phone" type="button">
-                        <span class="device-icon" aria-hidden="true">📱</span>
-                        <span class="device-title">Play on Phone</span>
-                        <span class="device-copy">Virtual joystick and touch attacks tuned for smaller screens.</span>
-                    </button>
-                </div>
+                        <button class="device-card" data-device="phone" type="button">
+                            <span class="device-icon" aria-hidden="true">📱</span>
+                            <span class="device-title">Phone</span>
+                            <span class="device-copy">Virtual joystick and large touch buttons for mobile play.</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="menu-section">
+                    <div class="section-heading">
+                        <p class="eyebrow eyebrow-small">Step 2</p>
+                        <h2>Select Mode</h2>
+                    </div>
+                    <div class="mode-grid">
+                        <button class="mode-card is-selected" data-mode="story" type="button">
+                            <span class="device-title">Story Mode</span>
+                            <span class="device-copy">Climb five themed stages, level up, and defeat every boss.</span>
+                        </button>
+                        <button class="mode-card" data-mode="boss_rush" type="button">
+                            <span class="device-title">Boss Rush</span>
+                            <span class="device-copy">Face the bosses back-to-back with your current equipment.</span>
+                        </button>
+                        <button class="mode-card" data-mode="duel" type="button">
+                            <span class="device-title">Multiplayer Duel</span>
+                            <span class="device-copy">Host or join a WebSocket duel, or fall back to an AI rival.</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="menu-section">
+                    <div class="section-heading">
+                        <p class="eyebrow eyebrow-small">Step 3</p>
+                        <h2>Choose a Fighter</h2>
+                    </div>
+                    <div class="character-grid">
+                        <button class="character-card is-selected" data-character="warrior" type="button">
+                            <strong>Warrior</strong>
+                            <span>Balanced offense and durable armor.</span>
+                        </button>
+                        <button class="character-card" data-character="ninja" type="button">
+                            <strong>Ninja</strong>
+                            <span>Fast movement, knives, and teleport magic.</span>
+                        </button>
+                        <button class="character-card" data-character="monk" type="button">
+                            <strong>Monk</strong>
+                            <span>High mana, strong spellcasting, and staff control.</span>
+                        </button>
+                        <button class="character-card" data-character="knight" type="button">
+                            <strong>Knight</strong>
+                            <span>Heavy defense, axe strikes, and energy shielding.</span>
+                        </button>
+                    </div>
+                    <p id="characterSummary" class="network-status">
+                        Warrior starts with a bronze sword, hunter bow, and fireball.
+                    </p>
+                </section>
 
                 <div class="start-actions">
-                    <button id="startSinglePlayer" class="primary-action" type="button">Start Single Player</button>
+                    <button id="openInventoryButton" class="secondary-action" type="button">Manage Equipment</button>
+                    <button id="startGameButton" class="primary-action" type="button">Start Adventure</button>
                 </div>
 
                 <section class="multiplayer-panel" aria-label="Optional multiplayer setup">
                     <div>
-                        <p class="eyebrow eyebrow-small">Optional Multiplayer</p>
+                        <p class="eyebrow eyebrow-small">Optional Duel Networking</p>
                         <h2>WebSocket Matchmaking</h2>
                     </div>
 
@@ -46,12 +102,12 @@
                     </label>
 
                     <div class="multiplayer-actions">
-                        <button id="hostButton" class="secondary-action" type="button">Host Game</button>
-                        <button id="joinButton" class="secondary-action" type="button">Join Game</button>
+                        <button id="hostButton" class="secondary-action" type="button">Host Duel</button>
+                        <button id="joinButton" class="secondary-action" type="button">Join Duel</button>
                     </div>
 
                     <p id="networkStatus" class="network-status">
-                        If multiplayer is unavailable, the game falls back to single-player automatically.
+                        Duel mode can use WebSockets when available. Otherwise the rival is controlled locally by AI.
                     </p>
                 </section>
             </div>
@@ -60,10 +116,11 @@
         <section id="pauseOverlay" class="overlay">
             <div class="menu-panel pause-panel">
                 <p class="eyebrow eyebrow-small">Paused</p>
-                <h2>Take a Breath</h2>
-                <p class="menu-copy">Resume the duel, return to the dojo gate, or keep experimenting with the systems.</p>
+                <h2>Regroup</h2>
+                <p class="menu-copy">Resume the fight, adjust equipment, or step back to the gate.</p>
                 <div class="panel-actions">
                     <button id="resumeButton" class="primary-action" type="button">Resume Fight</button>
+                    <button id="pauseInventoryButton" class="secondary-action" type="button">Equipment</button>
                     <button id="returnToMenuButton" class="secondary-action" type="button">Return to Start Menu</button>
                 </div>
             </div>
@@ -76,7 +133,7 @@
                 <p id="resultMessage" class="menu-copy">You won the round.</p>
                 <div class="panel-actions">
                     <button id="continueButton" class="primary-action" type="button">Continue</button>
-                    <button id="restartRunButton" class="secondary-action" type="button">Restart Campaign</button>
+                    <button id="restartRunButton" class="secondary-action" type="button">Restart Run</button>
                 </div>
             </div>
         </section>
@@ -84,8 +141,49 @@
         <section id="bossWarningOverlay" class="overlay boss-warning">
             <div class="warning-panel">
                 <p class="eyebrow eyebrow-small">Warning</p>
-                <h2>Boss Incoming</h2>
-                <p>The dojo master enters the arena with rage-fueled weapon attacks.</p>
+                <h2 id="bossWarningTitle">Boss Incoming</h2>
+                <p id="bossWarningCopy">A powerful enemy is entering the arena.</p>
+            </div>
+        </section>
+
+        <section id="inventoryOverlay" class="overlay">
+            <div class="menu-panel inventory-panel">
+                <div class="inventory-header">
+                    <div>
+                        <p class="eyebrow eyebrow-small">Inventory</p>
+                        <h2>Equipment And Magic</h2>
+                    </div>
+                    <button id="closeInventoryButton" class="secondary-action" type="button">Close</button>
+                </div>
+
+                <div class="inventory-layout">
+                    <aside class="slot-list" id="equipmentSlotList" aria-label="Equipment slots">
+                        <button class="slot-pill is-selected" data-slot="helmet" type="button">Helmet</button>
+                        <button class="slot-pill" data-slot="armor" type="button">Armor</button>
+                        <button class="slot-pill" data-slot="boots" type="button">Boots</button>
+                        <button class="slot-pill" data-slot="gloves" type="button">Gloves</button>
+                        <button class="slot-pill" data-slot="weapon" type="button">Weapon</button>
+                        <button class="slot-pill" data-slot="ranged" type="button">Ranged</button>
+                        <button class="slot-pill" data-slot="magic" type="button">Magic</button>
+                    </aside>
+
+                    <div class="inventory-content">
+                        <div class="inventory-current">
+                            <p class="eyebrow eyebrow-small">Equipped</p>
+                            <div id="equippedSummary" class="equipped-summary"></div>
+                        </div>
+
+                        <div class="inventory-current">
+                            <p class="eyebrow eyebrow-small">Stats</p>
+                            <div id="statsComparison" class="comparison-panel"></div>
+                        </div>
+
+                        <div class="inventory-current">
+                            <p id="inventorySlotTitle" class="eyebrow eyebrow-small">Helmet Choices</p>
+                            <div id="inventoryItems" class="item-grid"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -102,29 +200,37 @@
                     <p id="modeDescription" class="info-copy">Select a device to begin.</p>
                     <div id="desktopHelp" class="help-grid">
                         <span><strong>A / D</strong> Move</span>
-                        <span><strong>W</strong> Jump</span>
-                        <span><strong>S</strong> Crouch</span>
+                        <span><strong>W / S</strong> Jump / Crouch</span>
                         <span><strong>J / K</strong> Punch / Kick</span>
                         <span><strong>L</strong> Weapon Attack</span>
-                        <span><strong>Q / Tap</strong> Switch Weapon</span>
+                        <span><strong>U</strong> Ranged Attack</span>
+                        <span><strong>I</strong> Magic Ability</span>
+                        <span><strong>Q / E / R</strong> Cycle Gear</span>
+                        <span><strong>Tab</strong> Inventory</span>
                         <span><strong>P / Esc</strong> Pause</span>
                         <span><strong>Hold Back</strong> Block</span>
                     </div>
                     <div id="phoneHelp" class="touch-help">
-                        Use the joystick to move or crouch, then tap jump, punch, kick, or weapon attack.
+                        Move with the joystick, then tap attack, ranged, magic, or inventory buttons.
                     </div>
                 </div>
 
                 <div class="info-section">
                     <p class="eyebrow eyebrow-small">Loadout</p>
-                    <button id="switchWeaponButton" class="secondary-action switch-action" type="button">Switch Weapon</button>
-                    <p id="weaponHint" class="info-copy">Sword equipped.</p>
+                    <div class="side-actions">
+                        <button id="switchWeaponButton" class="secondary-action" type="button">Switch Weapon</button>
+                        <button id="switchRangedButton" class="secondary-action" type="button">Switch Ranged</button>
+                        <button id="switchMagicButton" class="secondary-action" type="button">Switch Magic</button>
+                        <button id="inventoryToggleButton" class="secondary-action" type="button">Inventory</button>
+                    </div>
+                    <p id="weaponHint" class="info-copy">Select a fighter to inspect the current loadout.</p>
                 </div>
 
                 <div class="info-section">
-                    <p class="eyebrow eyebrow-small">Systems</p>
-                    <p class="info-copy">
-                        Features include boss fights, AI scaling, particles, combo chains, XP progression, and optional WebSocket input sync.
+                    <p class="eyebrow eyebrow-small">Run Status</p>
+                    <p id="stageHint" class="info-copy">Story mode travels from the Dojo to the Shadow Realm.</p>
+                    <p id="systemHint" class="info-copy">
+                        Features include staged progression, boss rewards, equipment sets, magic, particles, and optional WebSocket duel syncing.
                     </p>
                 </div>
             </aside>
@@ -140,6 +246,10 @@
                 <button class="touch-button punch-button" data-touch-action="punch" type="button">Punch</button>
                 <button class="touch-button kick-button" data-touch-action="kick" type="button">Kick</button>
                 <button class="touch-button weapon-button" data-touch-action="weapon" type="button">Weapon</button>
+                <button class="touch-button ranged-button" data-touch-action="ranged" type="button">Ranged</button>
+                <button class="touch-button magic-button" data-touch-action="magic" type="button">Magic</button>
+                <button class="touch-button utility-button" data-touch-action="inventory" type="button">Inventory</button>
+                <button class="touch-button utility-button" data-touch-action="pause" type="button">Pause</button>
             </div>
         </section>
     </main>
@@ -195,7 +305,9 @@
     <script defer src="engine/audio.js"></script>
     <script defer src="engine/particles.js"></script>
     <script defer src="engine/network.js"></script>
+    <script defer src="entities/equipment.js"></script>
     <script defer src="entities/weapon.js"></script>
+    <script defer src="entities/projectile.js"></script>
     <script defer src="entities/fighter.js"></script>
     <script defer src="entities/enemyAI.js"></script>
     <script defer src="entities/boss.js"></script>
@@ -203,6 +315,7 @@
     <script defer src="ui/comboCounter.js"></script>
     <script defer src="ui/hud.js"></script>
     <script defer src="ui/menu.js"></script>
+    <script defer src="ui/inventoryMenu.js"></script>
     <script defer src="systems/combatSystem.js"></script>
     <script defer src="systems/progressionSystem.js"></script>
     <script defer src="main.js"></script>
