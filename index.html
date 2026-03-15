@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Fight Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="game-page">
+        <section class="game-shell" aria-label="Shadow Fight arena">
+            <header class="hud">
+                <div class="health-panel">
+                    <div class="health-label-row">
+                        <span class="fighter-name">Player</span>
+                        <span id="playerHealthValue">100</span>
+                    </div>
+                    <div class="health-track">
+                        <div id="playerHealthFill" class="health-fill player-fill"></div>
+                    </div>
+                </div>
+
+                <div class="round-badge">
+                    <span class="round-title">Shadow Duel</span>
+                    <span id="statusBadge" class="round-status">Fight</span>
+                </div>
+
+                <div class="health-panel">
+                    <div class="health-label-row health-label-row-right">
+                        <span id="enemyHealthValue">100</span>
+                        <span class="fighter-name">Enemy</span>
+                    </div>
+                    <div class="health-track">
+                        <div id="enemyHealthFill" class="health-fill enemy-fill"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="arena-frame">
+                <canvas id="gameCanvas" width="960" height="540">
+                    Your browser does not support the HTML5 canvas element.
+                </canvas>
+
+                <div id="roundOverlay" class="round-overlay hidden" aria-live="polite">
+                    <p class="overlay-label">Round Over</p>
+                    <h1 id="winnerText">Player Wins!</h1>
+                    <button id="restartButton" class="restart-button" type="button">Restart Fight</button>
+                </div>
+            </div>
+
+            <aside class="controls-card">
+                <h2>Controls</h2>
+                <div class="control-grid">
+                    <span><strong>A / D</strong> Move</span>
+                    <span><strong>W</strong> Jump</span>
+                    <span><strong>S</strong> Crouch</span>
+                    <span><strong>J</strong> Punch</span>
+                    <span><strong>K</strong> Kick</span>
+                    <span><strong>P</strong> Pause</span>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <script src="game.js"></script>
+</body>
+</html>
