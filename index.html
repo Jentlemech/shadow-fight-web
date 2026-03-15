@@ -2,115 +2,209 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Shadow Fight Web</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="game-page">
-        <section id="startScreen" class="start-screen" aria-label="Device selection menu">
-            <div class="start-card">
-                <p class="start-kicker">Choose Your Device</p>
-                <h1 class="start-title">Shadow Fight Web</h1>
-                <p class="start-copy">
-                    Pick the control style you want, then step into the dojo.
+    <main class="app-shell">
+        <section id="menuOverlay" class="overlay overlay-active">
+            <div class="menu-panel start-panel">
+                <p class="eyebrow">Silhouette Arena</p>
+                <h1>Shadow Fight Web</h1>
+                <p class="menu-copy">
+                    Choose your device, pick a mode, and enter a compact fighting game engine built entirely with HTML5 Canvas and vanilla JavaScript.
                 </p>
 
-                <div class="device-actions">
-                    <button class="device-button" data-device="phone" type="button">
-                        <span class="device-icon" aria-hidden="true">📱</span>
-                        <span class="device-name">Play on Phone</span>
-                        <span class="device-copy">Touch buttons and a tighter mobile layout.</span>
+                <div class="device-grid">
+                    <button class="device-card is-selected" data-device="desktop" type="button">
+                        <span class="device-icon" aria-hidden="true">💻</span>
+                        <span class="device-title">Play on Laptop/Desktop</span>
+                        <span class="device-copy">Keyboard combat with pause and weapon hotkeys.</span>
                     </button>
 
-                    <button class="device-button" data-device="desktop" type="button">
-                        <span class="device-icon" aria-hidden="true">💻</span>
-                        <span class="device-name">Play on Laptop/Desktop</span>
-                        <span class="device-copy">Keyboard controls with a visible key guide.</span>
+                    <button class="device-card" data-device="phone" type="button">
+                        <span class="device-icon" aria-hidden="true">📱</span>
+                        <span class="device-title">Play on Phone</span>
+                        <span class="device-copy">Virtual joystick and touch attacks tuned for smaller screens.</span>
                     </button>
+                </div>
+
+                <div class="start-actions">
+                    <button id="startSinglePlayer" class="primary-action" type="button">Start Single Player</button>
+                </div>
+
+                <section class="multiplayer-panel" aria-label="Optional multiplayer setup">
+                    <div>
+                        <p class="eyebrow eyebrow-small">Optional Multiplayer</p>
+                        <h2>WebSocket Matchmaking</h2>
+                    </div>
+
+                    <label class="socket-field">
+                        <span>WebSocket URL</span>
+                        <input id="socketUrl" type="text" value="ws://localhost:8080" spellcheck="false">
+                    </label>
+
+                    <div class="multiplayer-actions">
+                        <button id="hostButton" class="secondary-action" type="button">Host Game</button>
+                        <button id="joinButton" class="secondary-action" type="button">Join Game</button>
+                    </div>
+
+                    <p id="networkStatus" class="network-status">
+                        If multiplayer is unavailable, the game falls back to single-player automatically.
+                    </p>
+                </section>
+            </div>
+        </section>
+
+        <section id="pauseOverlay" class="overlay">
+            <div class="menu-panel pause-panel">
+                <p class="eyebrow eyebrow-small">Paused</p>
+                <h2>Take a Breath</h2>
+                <p class="menu-copy">Resume the duel, return to the dojo gate, or keep experimenting with the systems.</p>
+                <div class="panel-actions">
+                    <button id="resumeButton" class="primary-action" type="button">Resume Fight</button>
+                    <button id="returnToMenuButton" class="secondary-action" type="button">Return to Start Menu</button>
                 </div>
             </div>
         </section>
 
-        <section id="gameShell" class="game-shell" aria-label="Shadow Fight arena">
-            <header class="hud">
-                <div class="health-panel">
-                    <div class="health-label-row">
-                        <span class="fighter-name">Player</span>
-                        <span id="playerHealthValue">100</span>
-                    </div>
-                    <div class="health-track">
-                        <div id="playerHealthFill" class="health-fill player-fill"></div>
-                    </div>
-                </div>
-
-                <div class="round-badge">
-                    <span class="round-title">Shadow Duel</span>
-                    <span id="statusBadge" class="round-status">Fight</span>
-                </div>
-
-                <div class="health-panel">
-                    <div class="health-label-row health-label-row-right">
-                        <span id="enemyHealthValue">100</span>
-                        <span class="fighter-name">Enemy</span>
-                    </div>
-                    <div class="health-track">
-                        <div id="enemyHealthFill" class="health-fill enemy-fill"></div>
-                    </div>
-                </div>
-            </header>
-
-            <div class="arena-frame">
-                <canvas id="gameCanvas" width="960" height="540">
-                    Your browser does not support the HTML5 canvas element.
-                </canvas>
-
-                <div id="roundOverlay" class="round-overlay hidden" aria-live="polite">
-                    <p class="overlay-label">Round Over</p>
-                    <h1 id="winnerText">Player Wins!</h1>
-                    <button id="restartButton" class="restart-button" type="button">Restart Fight</button>
+        <section id="gameOverOverlay" class="overlay">
+            <div class="menu-panel result-panel">
+                <p id="resultEyebrow" class="eyebrow eyebrow-small">Round Complete</p>
+                <h2 id="resultTitle">Victory</h2>
+                <p id="resultMessage" class="menu-copy">You won the round.</p>
+                <div class="panel-actions">
+                    <button id="continueButton" class="primary-action" type="button">Continue</button>
+                    <button id="restartRunButton" class="secondary-action" type="button">Restart Campaign</button>
                 </div>
             </div>
+        </section>
 
-            <aside class="controls-card">
-                <p id="modeHint" class="mode-hint">Choose a device to begin the duel.</p>
+        <section id="bossWarningOverlay" class="overlay boss-warning">
+            <div class="warning-panel">
+                <p class="eyebrow eyebrow-small">Warning</p>
+                <h2>Boss Incoming</h2>
+                <p>The dojo master enters the arena with rage-fueled weapon attacks.</p>
+            </div>
+        </section>
 
-                <div id="keyboardInstructions" class="instruction-block desktop-instructions">
-                    <h2>Keyboard Controls</h2>
-                    <div class="control-grid">
-                        <span><strong>A</strong> Move Left</span>
-                        <span><strong>D</strong> Move Right</span>
+        <section class="game-frame">
+            <div class="canvas-shell">
+                <canvas id="gameCanvas" width="1280" height="720" aria-label="Shadow Fight arena">
+                    Your browser does not support the HTML5 canvas element.
+                </canvas>
+            </div>
+
+            <aside class="info-panel">
+                <div class="info-section">
+                    <p class="eyebrow eyebrow-small">Controls</p>
+                    <p id="modeDescription" class="info-copy">Select a device to begin.</p>
+                    <div id="desktopHelp" class="help-grid">
+                        <span><strong>A / D</strong> Move</span>
                         <span><strong>W</strong> Jump</span>
                         <span><strong>S</strong> Crouch</span>
-                        <span><strong>J</strong> Punch</span>
-                        <span><strong>K</strong> Kick</span>
-                        <span><strong>P</strong> Pause</span>
+                        <span><strong>J / K</strong> Punch / Kick</span>
+                        <span><strong>L</strong> Weapon Attack</span>
+                        <span><strong>Q / Tap</strong> Switch Weapon</span>
+                        <span><strong>P / Esc</strong> Pause</span>
+                        <span><strong>Hold Back</strong> Block</span>
+                    </div>
+                    <div id="phoneHelp" class="touch-help">
+                        Use the joystick to move or crouch, then tap jump, punch, kick, or weapon attack.
                     </div>
                 </div>
 
-                <div id="phoneInstructions" class="instruction-block phone-instructions">
-                    <h2>Touch Controls</h2>
-                    <p class="touch-copy">
-                        Use the on-screen buttons below the arena to move, jump, punch, and kick.
+                <div class="info-section">
+                    <p class="eyebrow eyebrow-small">Loadout</p>
+                    <button id="switchWeaponButton" class="secondary-action switch-action" type="button">Switch Weapon</button>
+                    <p id="weaponHint" class="info-copy">Sword equipped.</p>
+                </div>
+
+                <div class="info-section">
+                    <p class="eyebrow eyebrow-small">Systems</p>
+                    <p class="info-copy">
+                        Features include boss fights, AI scaling, particles, combo chains, XP progression, and optional WebSocket input sync.
                     </p>
                 </div>
             </aside>
+        </section>
 
-            <section id="mobileControls" class="mobile-controls" aria-label="Touch controls">
-                <div class="touch-cluster move-cluster">
-                    <button class="touch-button move-button" data-control="left" type="button">Left</button>
-                    <button class="touch-button move-button" data-control="right" type="button">Right</button>
-                </div>
+        <section id="mobileControls" class="mobile-controls" aria-label="Mobile touch controls">
+            <div id="joystickBase" class="joystick-base">
+                <div id="joystickThumb" class="joystick-thumb"></div>
+            </div>
 
-                <div class="touch-cluster action-cluster">
-                    <button class="touch-button action-button jump-button" data-control="jump" type="button">Jump</button>
-                    <button class="touch-button action-button punch-button" data-control="punch" type="button">Punch</button>
-                    <button class="touch-button action-button kick-button" data-control="kick" type="button">Kick</button>
-                </div>
-            </section>
+            <div class="touch-actions">
+                <button class="touch-button jump-button" data-touch-action="jump" type="button">Jump</button>
+                <button class="touch-button punch-button" data-touch-action="punch" type="button">Punch</button>
+                <button class="touch-button kick-button" data-touch-action="kick" type="button">Kick</button>
+                <button class="touch-button weapon-button" data-touch-action="weapon" type="button">Weapon</button>
+            </div>
         </section>
     </main>
 
-    <script src="game.js"></script>
+    <script>
+        window.ShadowFight = window.ShadowFight || {
+            engine: {},
+            entities: {},
+            systems: {},
+            ui: {},
+            utils: {}
+        };
+
+        (function (utils) {
+            utils.clamp = function (value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            };
+
+            utils.lerp = function (start, end, amount) {
+                return start + (end - start) * amount;
+            };
+
+            utils.approach = function (value, target, step) {
+                if (value < target) {
+                    return Math.min(value + step, target);
+                }
+                return Math.max(value - step, target);
+            };
+
+            utils.rand = function (min, max) {
+                return min + Math.random() * (max - min);
+            };
+
+            utils.rectsIntersect = function (a, b) {
+                return (
+                    a.x < b.x + b.w &&
+                    a.x + a.w > b.x &&
+                    a.y < b.y + b.h &&
+                    a.y + a.h > b.y
+                );
+            };
+
+            utils.easeOutCubic = function (value) {
+                return 1 - Math.pow(1 - value, 3);
+            };
+        })(window.ShadowFight.utils);
+    </script>
+    <script defer src="engine/gameLoop.js"></script>
+    <script defer src="engine/renderer.js"></script>
+    <script defer src="engine/input.js"></script>
+    <script defer src="engine/physics.js"></script>
+    <script defer src="engine/collision.js"></script>
+    <script defer src="engine/audio.js"></script>
+    <script defer src="engine/particles.js"></script>
+    <script defer src="engine/network.js"></script>
+    <script defer src="entities/weapon.js"></script>
+    <script defer src="entities/fighter.js"></script>
+    <script defer src="entities/enemyAI.js"></script>
+    <script defer src="entities/boss.js"></script>
+    <script defer src="ui/healthBar.js"></script>
+    <script defer src="ui/comboCounter.js"></script>
+    <script defer src="ui/hud.js"></script>
+    <script defer src="ui/menu.js"></script>
+    <script defer src="systems/combatSystem.js"></script>
+    <script defer src="systems/progressionSystem.js"></script>
+    <script defer src="main.js"></script>
 </body>
 </html>
