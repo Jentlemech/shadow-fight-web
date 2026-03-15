@@ -1,6 +1,11 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const startScreen = document.getElementById("startScreen");
+const deviceButtons = document.querySelectorAll("[data-device]");
+const modeHint = document.getElementById("modeHint");
+const touchButtons = document.querySelectorAll("[data-control]");
+
 const playerHealthFill = document.getElementById("playerHealthFill");
 const enemyHealthFill = document.getElementById("enemyHealthFill");
 const playerHealthValue = document.getElementById("playerHealthValue");
@@ -51,10 +56,15 @@ const ATTACKS = {
     }
 };
 
-const inputState = {
+const keyboardState = {
     left: false,
     right: false,
     crouch: false
+};
+
+const touchState = {
+    left: false,
+    right: false
 };
 
 const actionQueue = {
@@ -68,6 +78,8 @@ const gameState = {
     paused: false,
     roundOver: false,
     winner: "",
+    started: false,
+    deviceMode: "",
     hitEffects: []
 };
 
@@ -357,20 +369,83 @@ function updateEffects(dt) {
     });
 }
 
+function updateHud() {
+    playerHealthFill.style.width = `${player.health}%`;
+    enemyHealthFill.style.width = `${enemy.health}%`;
+    playerHealthValue.textContent = String(player.health);
+    enemyHealthValue.textContent = String(enemy.health);
+}
+
+function setStatus(text) {
+    statusBadge.textContent = text;
+}
+
+function updateModeHint() {
+    if (!gameState.started) {
+        modeHint.textContent = "Choose a device to begin the duel.";
+        return;
+    }
+
+    if (gameState.deviceMode === "phone") {
+        modeHint.textContent = "Phone mode active: use the touch controls below the arena.";
+        return;
+    }
+
+    modeHint.textContent = "Laptop/Desktop mode active: use the keyboard controls shown below.";
+}
+
+function clearQueuedActions() {
+    actionQueue.jump = false;
+    actionQueue.punch = false;
+    actionQueue.kick = false;
+}
+
+function clearHeldInputs() {
+    keyboardState.left = false;
+    keyboardState.right = false;
+    keyboardState.crouch = false;
+    touchState.left = false;
+    touchState.right = false;
+    clearQueuedActions();
+
+    for (const button of touchButtons) {
+        button.classList.remove("is-pressed");
+    }
+}
+
+function setDeviceMode(mode) {
+    gameState.deviceMode = mode;
+    document.body.classList.toggle("mode-active", Boolean(mode));
+    document.body.classList.toggle("desktop-mode", mode === "desktop");
+    document.body.classList.toggle("phone-mode", mode === "phone");
+}
+
+function startSelectedMode(mode) {
+    gameState.started = true;
+    setDeviceMode(mode);
+    startScreen.classList.add("hidden");
+    gameState.lastTime = 0;
+    clearHeldInputs();
+    resetGame();
+    updateModeHint();
+}
+
 function createPlayerInput() {
-    const move = (inputState.right ? 1 : 0) - (inputState.left ? 1 : 0);
+    const keyboardEnabled = gameState.deviceMode === "desktop";
+    const touchEnabled = gameState.deviceMode === "phone";
+    const move =
+        ((keyboardEnabled && keyboardState.right) || (touchEnabled && touchState.right) ? 1 : 0) -
+        ((keyboardEnabled && keyboardState.left) || (touchEnabled && touchState.left) ? 1 : 0);
+
     const input = {
         move,
-        crouch: inputState.crouch,
+        crouch: keyboardEnabled && keyboardState.crouch,
         jump: actionQueue.jump,
         punch: actionQueue.punch,
         kick: actionQueue.kick
     };
 
-    actionQueue.jump = false;
-    actionQueue.punch = false;
-    actionQueue.kick = false;
-
+    clearQueuedActions();
     return input;
 }
 
@@ -458,26 +533,6 @@ function resolveAttack(attacker, defender) {
     }
 }
 
-function updateHud() {
-    const playerPercent = `${player.health}%`;
-    const enemyPercent = `${enemy.health}%`;
-
-    playerHealthFill.style.width = playerPercent;
-    enemyHealthFill.style.width = enemyPercent;
-    playerHealthValue.textContent = String(player.health);
-    enemyHealthValue.textContent = String(enemy.health);
-}
-
-function setStatus(text) {
-    statusBadge.textContent = text;
-}
-
-function clearQueuedActions() {
-    actionQueue.jump = false;
-    actionQueue.punch = false;
-    actionQueue.kick = false;
-}
-
 function endRound(winnerName) {
     if (gameState.roundOver) {
         return;
@@ -500,14 +555,15 @@ function resetGame() {
     enemyBrain.moveIntent = 0;
     enemyBrain.decisionTimer = 0;
     enemyBrain.jumpTimer = 0;
-    clearQueuedActions();
+    clearHeldInputs();
     roundOverlay.classList.add("hidden");
     setStatus("Fight");
     updateHud();
+    updateModeHint();
 }
 
 function togglePause() {
-    if (gameState.roundOver) {
+    if (!gameState.started || gameState.deviceMode !== "desktop" || gameState.roundOver) {
         return;
     }
 
@@ -517,6 +573,10 @@ function togglePause() {
 }
 
 function update(dt) {
+    if (!gameState.started) {
+        return;
+    }
+
     if (gameState.roundOver || gameState.paused) {
         updateEffects(dt);
         return;
@@ -887,7 +947,7 @@ function gameLoop(timestamp) {
 }
 
 function handleKeyChange(event, isPressed) {
-    // Queue one-shot actions on keydown so attacks and jumps do not repeat every frame.
+    // Desktop mode uses queued one-shot actions so jumps and attacks feel crisp.
     const key = event.key.toLowerCase();
     const trackedKeys = ["a", "d", "w", "s", "j", "k", "p"];
 
@@ -895,16 +955,20 @@ function handleKeyChange(event, isPressed) {
         event.preventDefault();
     }
 
+    if (!gameState.started || gameState.deviceMode !== "desktop") {
+        return;
+    }
+
     if (key === "a") {
-        inputState.left = isPressed;
+        keyboardState.left = isPressed;
     }
 
     if (key === "d") {
-        inputState.right = isPressed;
+        keyboardState.right = isPressed;
     }
 
     if (key === "s") {
-        inputState.crouch = isPressed;
+        keyboardState.crouch = isPressed;
     }
 
     if (!isPressed || event.repeat) {
@@ -928,13 +992,99 @@ function handleKeyChange(event, isPressed) {
     }
 }
 
+function queueTouchAction(control) {
+    if (!gameState.started || gameState.deviceMode !== "phone") {
+        return;
+    }
+
+    if (control === "jump") {
+        actionQueue.jump = true;
+    }
+
+    if (control === "punch") {
+        actionQueue.punch = true;
+    }
+
+    if (control === "kick") {
+        actionQueue.kick = true;
+    }
+}
+
+function setTouchDirection(control, isPressed) {
+    if (!gameState.started || gameState.deviceMode !== "phone") {
+        return;
+    }
+
+    if (control === "left") {
+        touchState.left = isPressed;
+    }
+
+    if (control === "right") {
+        touchState.right = isPressed;
+    }
+}
+
+function releaseTouchControl(button) {
+    const control = button.dataset.control;
+    button.classList.remove("is-pressed");
+
+    if (control === "left" || control === "right") {
+        setTouchDirection(control, false);
+    }
+}
+
 window.addEventListener("keydown", (event) => handleKeyChange(event, true));
 window.addEventListener("keyup", (event) => handleKeyChange(event, false));
+window.addEventListener("blur", clearHeldInputs);
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        clearHeldInputs();
+    }
+});
+
+for (const button of touchButtons) {
+    button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+
+        if (!gameState.started || gameState.deviceMode !== "phone") {
+            return;
+        }
+
+        button.classList.add("is-pressed");
+        if (button.setPointerCapture) {
+            try {
+                button.setPointerCapture(event.pointerId);
+            } catch (error) {
+                // Ignore capture failures and fall back to the leave/cancel handlers.
+            }
+        }
+
+        const control = button.dataset.control;
+        if (control === "left" || control === "right") {
+            setTouchDirection(control, true);
+        } else {
+            queueTouchAction(control);
+        }
+    });
+
+    button.addEventListener("pointerup", () => releaseTouchControl(button));
+    button.addEventListener("pointercancel", () => releaseTouchControl(button));
+    button.addEventListener("pointerleave", () => releaseTouchControl(button));
+    button.addEventListener("lostpointercapture", () => releaseTouchControl(button));
+}
+
+for (const button of deviceButtons) {
+    button.addEventListener("click", () => {
+        startSelectedMode(button.dataset.device);
+    });
+}
 
 restartButton.addEventListener("click", () => {
     gameState.lastTime = 0;
     resetGame();
 });
 
-resetGame();
+updateHud();
+updateModeHint();
 requestAnimationFrame(gameLoop);

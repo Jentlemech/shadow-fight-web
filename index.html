@@ -8,7 +8,31 @@
 </head>
 <body>
     <main class="game-page">
-        <section class="game-shell" aria-label="Shadow Fight arena">
+        <section id="startScreen" class="start-screen" aria-label="Device selection menu">
+            <div class="start-card">
+                <p class="start-kicker">Choose Your Device</p>
+                <h1 class="start-title">Shadow Fight Web</h1>
+                <p class="start-copy">
+                    Pick the control style you want, then step into the dojo.
+                </p>
+
+                <div class="device-actions">
+                    <button class="device-button" data-device="phone" type="button">
+                        <span class="device-icon" aria-hidden="true">📱</span>
+                        <span class="device-name">Play on Phone</span>
+                        <span class="device-copy">Touch buttons and a tighter mobile layout.</span>
+                    </button>
+
+                    <button class="device-button" data-device="desktop" type="button">
+                        <span class="device-icon" aria-hidden="true">💻</span>
+                        <span class="device-name">Play on Laptop/Desktop</span>
+                        <span class="device-copy">Keyboard controls with a visible key guide.</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="gameShell" class="game-shell" aria-label="Shadow Fight arena">
             <header class="hud">
                 <div class="health-panel">
                     <div class="health-label-row">
@@ -49,16 +73,41 @@
             </div>
 
             <aside class="controls-card">
-                <h2>Controls</h2>
-                <div class="control-grid">
-                    <span><strong>A / D</strong> Move</span>
-                    <span><strong>W</strong> Jump</span>
-                    <span><strong>S</strong> Crouch</span>
-                    <span><strong>J</strong> Punch</span>
-                    <span><strong>K</strong> Kick</span>
-                    <span><strong>P</strong> Pause</span>
+                <p id="modeHint" class="mode-hint">Choose a device to begin the duel.</p>
+
+                <div id="keyboardInstructions" class="instruction-block desktop-instructions">
+                    <h2>Keyboard Controls</h2>
+                    <div class="control-grid">
+                        <span><strong>A</strong> Move Left</span>
+                        <span><strong>D</strong> Move Right</span>
+                        <span><strong>W</strong> Jump</span>
+                        <span><strong>S</strong> Crouch</span>
+                        <span><strong>J</strong> Punch</span>
+                        <span><strong>K</strong> Kick</span>
+                        <span><strong>P</strong> Pause</span>
+                    </div>
+                </div>
+
+                <div id="phoneInstructions" class="instruction-block phone-instructions">
+                    <h2>Touch Controls</h2>
+                    <p class="touch-copy">
+                        Use the on-screen buttons below the arena to move, jump, punch, and kick.
+                    </p>
                 </div>
             </aside>
+
+            <section id="mobileControls" class="mobile-controls" aria-label="Touch controls">
+                <div class="touch-cluster move-cluster">
+                    <button class="touch-button move-button" data-control="left" type="button">Left</button>
+                    <button class="touch-button move-button" data-control="right" type="button">Right</button>
+                </div>
+
+                <div class="touch-cluster action-cluster">
+                    <button class="touch-button action-button jump-button" data-control="jump" type="button">Jump</button>
+                    <button class="touch-button action-button punch-button" data-control="punch" type="button">Punch</button>
+                    <button class="touch-button action-button kick-button" data-control="kick" type="button">Kick</button>
+                </div>
+            </section>
         </section>
     </main>
 
